@@ -1,0 +1,12 @@
+---
+# defaults file for prepare_env
+
+# Default theme
+oh_my_zsh_theme: agnoster
+
+# Default plugins
+oh_my_zsh_plugins:
+  - git
+  - sudo
+  - zsh-autosuggestions
+  - zsh-syntax-highlighting

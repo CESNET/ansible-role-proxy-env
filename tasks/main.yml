@@ -1,0 +1,120 @@
+---
+# tasks file for prepare_env
+- name: Install Czech locale
+  locale_gen:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - "en_US.UTF-8"
+    - "cs_CZ.UTF-8"
+
+- name: Set timezone
+  timezone:
+    name: Europe/Prague
+
+- name: Install vim, htop, locate
+  apt:
+    name:
+      - vim
+      - htop
+      - locate
+
+- name: create /root/.bashrc if it does not exist
+  copy:
+    content: ""
+    dest: /root/.bashrc
+    force: no
+
+- name: fix cmd prompt
+  blockinfile:
+    dest: /root/.bashrc
+    block: |
+      # If this is an xterm set the title to user@host:dir
+      case "$TERM" in
+      xterm*|rxvt*)
+         PS1="\[\e]0;\u@$(hostname --fqdn) \w\a\]\u@$(hostname --fqdn):\w# "
+         ;;
+      *)
+         ;;
+      esac
+      export EDITOR=vi
+
+- name: create /root/.vimrc if it does not exist
+  copy:
+    content: ""
+    dest: /root/.vimrc
+    force: no
+
+- name: dir /root/.config/htop exists
+  file:
+    path: /root/.config/htop
+    state: directory
+
+- name: create /root/.config/htop/htoprc
+  copy:
+    content: ""
+    dest: /root/.config/htop/htoprc
+    force: no
+
+- name: htop hide user threads
+  lineinfile:
+    path: /root/.config/htop/htoprc
+    regexp: '^hide_userland_threads='
+    line:   'hide_userland_threads=1'
+
+- name: "PREPARE_ENV - Config vim"
+  blockinfile:
+    dest: /root/.vimrc
+    marker: '" {mark} ANSIBLE MANAGED BLOCK'
+    block: |
+      " fix mouse
+      set mouse=r
+      " syntax highlighting
+      syntax on
+      set background=dark
+      " better search
+      set incsearch
+      " When editing a file, always jump to the last known cursor position.
+      " Don't do it when the position is invalid or when inside an event handler
+      " (happens when dropping a file on gvim).
+      autocmd BufReadPost *
+        \ if line("'\"") > 1 && line("'\"") <= line("$") |
+        \   exe "normal! g`\"" |
+        \ endif
+      " set encoding
+      set encoding=utf-8
+      set fileencoding=utf-8
+
+- name: "PREPARE_ENV - Install dependencies"
+  package:
+    name:
+      - git
+      - zsh
+    state: present
+
+- name: "PREPARE_ENV - Clone oh-my-zsh for root"
+  git:
+    repo: https://github.com/robbyrussell/oh-my-zsh.git
+    dest: /root/.oh-my-zsh
+
+- name: "PREPARE_ENV - Clone oh-my-zsh module: zsh-autosuggestions for root"
+  git:
+    repo: https://github.com/zsh-users/zsh-autosuggestions.git
+    dest: /root/.oh-my-zsh/custom/plugins/zsh-autosuggestions
+
+- name: "PREPARE_ENV - Clone oh-my-zsh module: zsh-syntax-highlighting for root"
+  git:
+    repo: https://github.com/zsh-users/zsh-syntax-highlighting.git
+    dest: /root/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting
+
+- name: "PREPARE_ENV - Prepare .zshrc file"
+  template:
+    src: zshrc.j2
+    dest: '/root/.zshrc'
+    backup: yes
+    mode: 'u=rw,go=r'
+
+- name: "PREPARE_ENV - Set login message"
+  copy:
+    src: "motd"
+    dest: "/etc/motd"
