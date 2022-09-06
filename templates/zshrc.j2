@@ -99,3 +99,8 @@ source $ZSH/oh-my-zsh.sh
 # Example aliases
 # alias zshconfig="mate ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
+
+# Aliases
+{% for item in oh_my_zsh_aliases | default('[]') %}
+alias {{ item.name }}='{{ item.cmd }}'
+{% endfor %}

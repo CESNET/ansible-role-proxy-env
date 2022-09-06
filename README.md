@@ -11,6 +11,9 @@ Role Variables
 
 * oh_my_zsh_theme 
 * oh_my_zsh_plugins
+* oh_my_zsh_aliases
+
+Exampe values are available in defaults/main.yml
 
 Example Playbook
 ----------------

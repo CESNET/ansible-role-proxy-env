@@ -10,3 +10,7 @@ oh_my_zsh_plugins:
   - sudo
   - zsh-autosuggestions
   - zsh-syntax-highlighting
+
+# List of aliases to be added to .zshrc
+# Example: - { name: "name", cmd: "command"}
+oh_my_zsh_aliases: []
